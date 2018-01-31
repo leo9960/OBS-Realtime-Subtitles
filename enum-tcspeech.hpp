@@ -1,0 +1,64 @@
+#pragma once
+
+#define WIN32_MEAN_AND_LEAN
+#include <windows.h>
+#include <mmdeviceapi.h>
+#include <audioclient.h>
+#include <propsys.h>
+
+#ifdef __MINGW32__
+
+#ifdef DEFINE_PROPERTYKEY
+#undef DEFINE_PROPERTYKEY
+#endif
+#define DEFINE_PROPERTYKEY(id, a, b, c, d, e, f, g, h, i, j, k, l) \
+	const PROPERTYKEY id = { { a,b,c, { d,e,f,g,h,i,j,k, } }, l };
+DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName, \
+	0xa45c254e, 0xdf1c, 0x4efd, 0x80, \
+	0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
+
+#else
+
+#include <functiondiscoverykeys_devpkey.h>
+
+#endif
+
+#include <vector>
+#include <string>
+
+#define KSAUDIO_SPEAKER_2POINT1 (KSAUDIO_SPEAKER_STEREO|SPEAKER_LOW_FREQUENCY)
+#define KSAUDIO_SPEAKER_SURROUND_AVUTIL \
+	(KSAUDIO_SPEAKER_STEREO|SPEAKER_FRONT_CENTER)
+#define KSAUDIO_SPEAKER_4POINT1 (KSAUDIO_SPEAKER_SURROUND|SPEAKER_LOW_FREQUENCY)
+
+#define safe_release(ptr) \
+	do { \
+		if (ptr) { \
+			ptr->Release(); \
+		} \
+	} while (false)
+
+struct AudioDeviceInfo {
+	std::string name;
+	std::string id;
+};
+
+std::string GetDeviceName(IMMDevice *device);
+void GettcspeechAudioDevices(std::vector<AudioDeviceInfo> &devices, bool input);
+
+
+typedef enum _tag_AsrRecogType
+{
+    kRecogTypeUnkown = -1,      //未知类型
+    kRecogTypeCloud = 0,        //云端识别
+    kRecogTypeLocal,            //本地识别
+}AsrRecogType;
+
+typedef enum _tag_AsrRecogMode
+{
+    kRecogModeUnkown = -1,      //未知类型
+    kRecogModeFreetalk = 0,     //自由说
+    kRecogModeGrammar,          //语法识别
+}AsrRecogMode;
+
+
